@@ -3,9 +3,13 @@ from flask import render_template, redirect, url_for, request, flash
 from flask_login import login_user, login_required, logout_user
 from sqlalchemy.exc import IntegrityError
 from werkzeug.security import check_password_hash, generate_password_hash
+import requests
 
 from app import app, db
-from app.models import User, Book, Box
+from app.models import User, Book, Order
+
+# for pay
+from cloudipsp import Api, Checkout
 
 
 @app.route('/', methods=['GET'])
@@ -30,15 +34,9 @@ def main():
     return render_template('private/main.html', data=books)
 
 
-@app.route('/box', methods=['GET'])
-@login_required
-def box():
-    a = Box.query.all()
-    return render_template('private/box.html', data=a)
-
-
 @app.route('/login', methods=['GET', 'POST'])
 def login_page():
+    """Функция входа"""
     login = request.form.get('login')
     password = request.form.get('password')
 
@@ -62,6 +60,7 @@ def login_page():
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
+    """Функция регистрации"""
     login = request.form.get('login')
     password = request.form.get('password')
     password2 = request.form.get('password2')
@@ -103,10 +102,62 @@ def redirect_to_signin(response):
 
 @app.errorhandler(404)
 def error404(error):
+    """Функция-обработчик ошибки отсутствия страницы"""
     return render_template('404.html')
 
 
 @app.route('/None', methods=['GET'])
 @login_required
 def none_page():
+    """Функция-обработчик отсутствующей страницы перенаправления"""
     return render_template('private/main.html')
+
+
+@app.route('/buy/<int:id>')
+def book_buy(id):
+    """Функция покупки. Необходим VPN"""
+    book = Book.query.get(id)  # get book.id from database
+
+    api = Api(merchant_id=1396424,
+              secret_key='test')
+    checkout = Checkout(api=api)
+    data = {
+        "currency": "USD",
+        "amount": str(book.price) + '00'
+    }
+    url = checkout.url(data).get('checkout_url')
+
+    user_id = flask_login.current_user.id
+    book_id = id
+    status = 'buy'
+    new_order = Order(user_id=user_id, book_id=book_id, status=status)
+    db.session.add(new_order)
+    db.session.commit()
+    return redirect(url)
+
+
+@app.route('/rent/<int:days>/<int:id>')
+def book_rent(days: int, id: int):
+    """Функция аренды. Необходим VPN"""
+    book = Book.query.get(id)  # get book.id from database
+    rent_price = book.price / 100 * days
+    print(rent_price)
+    print(type(rent_price))
+
+    api = Api(merchant_id=1396424,
+              secret_key='test')
+    checkout = Checkout(api=api)
+    data = {
+        "currency": "USD",
+        "amount": str(int(rent_price)) + '00'
+    }
+    url = checkout.url(data).get('checkout_url')
+
+    user_id = flask_login.current_user.id
+    book_id = id
+    status = 'rent'
+    new_order = Order(user_id=user_id, book_id=book_id, status=status)
+    db.session.add(new_order)
+    db.session.commit()
+    return redirect(url)
+

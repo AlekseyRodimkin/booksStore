@@ -17,7 +17,7 @@
             {% for book in data %}
             <div class="col">
                 <div class="card shadow-sm">
-                    <img src={{ book.link }} width="100%" height="100%"/>
+                    <img src={{ book.image_link }} width="100%" height="100%"/>
                     </svg>
                     <div class="card-body">
                         <p></p><h4 class="my-0 fw-normal">{{ book.name }}</h4></p>
@@ -27,20 +27,23 @@
                         <p class="card-text">Цена: {{ book.price }} ₽</p>
                         <div class="d-flex justify-content-between align-items-center">
                             <div class="btn-group" role="group">
-<!--                                <a href="/buy/{{ book.id }}" target="_blank">-->
-<!--                                    <button type="button" class="btn btn-outline-primary">Купить</button>-->
-<!--                                </a>-->
-<!--                                <a href="/rent/{{ book.id }}" class="btn btn-outline-success">Аренда</a>-->
                                 <div class="btn-toolbar" role="toolbar"
                                      aria-label="Панель инструментов с группами кнопок">
                                     <div class="btn-group me-2" role="group" aria-label="Первая группа">
                                         <a href="/buy/{{ book.id }}" target="_blank" class="btn btn-primary">Купить</a>
                                     </div>
-                                <div class="btn-group" role="group" aria-label="Basic outlined example">
-                                    <a href="/rent/14/{{ book.id }}" target="_blank" class="btn btn-outline-secondary">2 недели</a>
-                                    <a href="/rent/31/{{ book.id }}" target="_blank" class="btn btn-outline-secondary">месяц</a>
-                                    <a href="/rent/93/{{ book.id }}" target="_blank" class="btn btn-outline-secondary">3 месяца</a>
-                                </div>
+
+                                    <div class="btn-toolbar" role="toolbar" aria-label="Toolbar with button groups">
+                                        <div class="btn-group mr-2" role="group" aria-label="First group">
+                                            <button type="button" class="btn btn-secondary" disabled>Аренда</button>
+                                            <a href="/rent/14/{{ book.id }}" target="_blank"
+                                               class="btn btn-secondary">2 нед</a>
+                                            <a href="/rent/31/{{ book.id }}" target="_blank"
+                                               class="btn btn-secondary">мес</a>
+                                            <a href="/rent/93/{{ book.id }}" target="_blank"
+                                               class="btn btn-secondary">3 мес</a>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>

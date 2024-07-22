@@ -40,7 +40,9 @@ nosetests.xml
 .venv
 venv
 env
+.env
 
+.db
 
 *.idea
 .idea/

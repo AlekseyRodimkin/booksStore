@@ -4,6 +4,8 @@ from flask_login import login_user, login_required, logout_user
 from sqlalchemy.exc import IntegrityError
 from werkzeug.security import check_password_hash, generate_password_hash
 import requests
+import os
+import io
 
 from app import app, db
 from app.models import User, Book, Order
@@ -45,10 +47,9 @@ def login_page():
 
         if user and check_password_hash(user.password, password):
             login_user(user)
-
-            next_page = request.args.get('next')
-
-            return redirect(next_page)
+            # next_page = request.args.get('next')
+            # return redirect(next_page)
+            return redirect('/main')
         else:
             flash('Некорректный логин или пароль')
     else:
@@ -115,7 +116,13 @@ def none_page():
 
 @app.route('/buy/<int:id>')
 def book_buy(id):
-    """Функция покупки. Необходим VPN"""
+    """
+    Функция покупки. Необходим VPN.
+
+    merchant_id: from account in Fondy
+    :param id: id книги
+    :return: url transaction
+    """
     book = Book.query.get(id)  # get book.id from database
 
     api = Api(merchant_id=1396424,
@@ -130,7 +137,7 @@ def book_buy(id):
     user_id = flask_login.current_user.id
     book_id = id
     status = 'buy'
-    new_order = Order(user_id=user_id, book_id=book_id, status=status)
+    new_order = Order(status=status, user_id=user_id, book=book)
     db.session.add(new_order)
     db.session.commit()
     return redirect(url)
@@ -138,7 +145,14 @@ def book_buy(id):
 
 @app.route('/rent/<int:days>/<int:id>')
 def book_rent(days: int, id: int):
-    """Функция аренды. Необходим VPN"""
+    """
+    Функция аренды. Необходим VPN.
+
+    merchant_id: from account in Fondy
+    :param days: количество дней
+    :param id: id книги
+    :return: url transaction
+    """
     book = Book.query.get(id)  # get book.id from database
     rent_price = book.price / 100 * days
     print(rent_price)
@@ -156,8 +170,24 @@ def book_rent(days: int, id: int):
     user_id = flask_login.current_user.id
     book_id = id
     status = 'rent'
-    new_order = Order(user_id=user_id, book_id=book_id, status=status)
+    new_order = Order(user_id=user_id, books=book_id, status=status)
     db.session.add(new_order)
     db.session.commit()
     return redirect(url)
 
+
+@app.route('/box', methods=['GET'])
+@login_required
+def box():
+    data = flask_login.current_user.orders
+    return render_template('private/box.html', data=data)
+
+
+@app.route('/reed/<int:id>', methods=['GET'])
+@login_required
+def reed(id):
+    book = db.session.query(Book).get(id)
+    text = os.path.abspath(os.path.join(os.path.dirname(__file__), 'books_files', book.filename))
+
+    with io.open(text, encoding='utf-8') as file:
+        return render_template('private/reed.html', data=book, text=file.readlines())

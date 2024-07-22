@@ -11,3 +11,6 @@
 # # получить id usera
 # u_id = flask_login.current_user.id
 #     return render_template('private/box.html', data=u_id)
+
+
+from dotenv import load_dotenv, find_dotenv

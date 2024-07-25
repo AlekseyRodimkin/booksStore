@@ -3,9 +3,9 @@ from flask import render_template, redirect, url_for, request, flash
 from flask_login import login_user, login_required, logout_user
 from sqlalchemy.exc import IntegrityError
 from werkzeug.security import check_password_hash, generate_password_hash
-import requests
 import os
 import io
+import datetime
 
 from app import app, db
 from app.models import User, Book, Order
@@ -154,23 +154,20 @@ def book_rent(days: int, id: int):
     :return: url transaction
     """
     book = Book.query.get(id)  # get book.id from database
-    rent_price = book.price / 100 * days
-    print(rent_price)
-    print(type(rent_price))
 
     api = Api(merchant_id=1396424,
               secret_key='test')
     checkout = Checkout(api=api)
     data = {
         "currency": "USD",
-        "amount": str(int(rent_price)) + '00'
+        "amount": str(book.price) + '00'
     }
     url = checkout.url(data).get('checkout_url')
 
     user_id = flask_login.current_user.id
-    book_id = id
     status = 'rent'
-    new_order = Order(user_id=user_id, books=book_id, status=status)
+    end_rent = (datetime.datetime.utcnow() + datetime.timedelta(days=days))
+    new_order = Order(status=status, user_id=user_id, book=book, end_rent=end_rent)
     db.session.add(new_order)
     db.session.commit()
     return redirect(url)
@@ -179,8 +176,9 @@ def book_rent(days: int, id: int):
 @app.route('/box', methods=['GET'])
 @login_required
 def box():
-    data = flask_login.current_user.orders
-    return render_template('private/box.html', data=data)
+    orders = flask_login.current_user.orders
+    time_now = datetime.datetime.now()
+    return render_template('private/box.html', data=orders, now=time_now)
 
 
 @app.route('/reed/<int:id>', methods=['GET'])

@@ -13,6 +13,8 @@
     <div class="container">
         <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3">
             {% for order in data %}
+            {% if order.end_rent %}
+            {% if now < order.end_rent %}
             <div class="col">
                 <div class="card shadow-sm">
                     <img src={{ order.book.image_link }} width="100%" height="100%"/>
@@ -24,13 +26,39 @@
                             <div class="btn-group" role="group">
                                 <div class="btn-toolbar" role="toolbar"
                                      aria-label="Панель инструментов с группами кнопок">
-                                    <a href="/reed/{{ order.book.id }}" target="_blank" class="btn btn-outline-secondary">Читать</a>
+                                    <a href="/reed/{{ order.book.id }}" target="_blank"
+                                       class="btn btn-outline-success btn-lg">Читать</a>
+                                </div>
+                            </div>
+                            <button type="button" class="btn btn-outline-dark disabled ">До {{ order.end_rent }}</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+            {% endif %}
+
+            {% if not order.end_rent %}
+             <div class="col">
+                <div class="card shadow-sm">
+                    <img src={{ order.book.image_link }} width="100%" height="100%"/>
+                    </svg>
+                    <div class="card-body">
+                        <p></p><h4 class="my-0 fw-normal">{{ order.book.name }}</h4></p>
+                        <p class="card-text"></p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div class="btn-group" role="group">
+                                <div class="btn-toolbar" role="toolbar"
+                                     aria-label="Панель инструментов с группами кнопок">
+                                    <a href="/reed/{{ order.book.id }}" target="_blank"
+                                       class="btn btn-outline-success btn-lg">Читать</a>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
+            {% endif %}
             {% endfor %}
         </div>
     </div>

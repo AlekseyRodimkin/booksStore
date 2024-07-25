@@ -35,6 +35,7 @@ class Order(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     status = db.Column(db.String(10))
     start_rent = db.Column(db.DateTime(), default=datetime.utcnow)
+    end_rent = db.Column(db.DateTime(), default=None)
     user_id = db.Column(db.Integer, ForeignKey('users.id'))  # многие к одному к User
     book = relationship("Book", uselist=False)  # один к одному к Book
 

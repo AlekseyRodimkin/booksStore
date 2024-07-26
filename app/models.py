@@ -2,7 +2,6 @@ from datetime import datetime
 from flask_login import UserMixin
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import relationship
-
 from app import db, manager
 from app import admin
 from flask_admin.contrib.sqla import ModelView

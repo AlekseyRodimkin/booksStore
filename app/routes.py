@@ -6,7 +6,6 @@ from werkzeug.security import check_password_hash, generate_password_hash
 import os
 import io
 import datetime
-
 from app import app, db
 from app.models import User, Book, Order
 
@@ -44,18 +43,11 @@ def login_page():
 
     if login and password:
         user = User.query.filter_by(login=login).first()
-
         if user and check_password_hash(user.password, password):
             login_user(user)
-            # next_page = request.args.get('next')
-            # return redirect(next_page)
             return redirect('/main')
         else:
             flash('Некорректный логин или пароль')
-    else:
-        # flash('Пожалуйста заполните все поля')
-        pass
-
     return render_template('public/login.html')
 
 

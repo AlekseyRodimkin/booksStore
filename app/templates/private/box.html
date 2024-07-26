@@ -17,7 +17,14 @@
             {% if now < order.end_rent %}
             <div class="col">
                 <div class="card shadow-sm">
-                    <img src={{ order.book.image_link }} width="100%" height="100%"/>
+                    <img src={{ order.book.image_link }} width="100%" height="100%">
+                    <h5><span
+                            class="position-absolute top-0 start-50 translate-middle badge rounded-pill badge text-bg-warning">
+                        Аренда
+                        <span class="visually-hidden">Арендованая книга</span>
+                    </span>
+                    </h5>
+                    </img>
                     </svg>
                     <div class="card-body">
                         <p></p><h4 class="my-0 fw-normal">{{ order.book.name }}</h4></p>
@@ -30,7 +37,8 @@
                                        class="btn btn-outline-success btn-lg">Читать</a>
                                 </div>
                             </div>
-                            <button type="button" class="btn btn-outline-dark disabled ">До {{ order.end_rent }}</button>
+                            <button type="button" class="btn btn-outline-dark disabled ">До {{ order.end_rent }}
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -39,7 +47,7 @@
             {% endif %}
 
             {% if not order.end_rent %}
-             <div class="col">
+            <div class="col">
                 <div class="card shadow-sm">
                     <img src={{ order.book.image_link }} width="100%" height="100%"/>
                     </svg>

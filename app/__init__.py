@@ -1,29 +1,34 @@
+import logging
+from logging.handlers import SMTPHandler, RotatingFileHandler
+import os
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
-from flask_login import LoginManager
-from flask_admin import Admin
 from flask_migrate import Migrate
-import os
-from dotenv import load_dotenv, find_dotenv
-
-if not find_dotenv():
-    exit("Переменные окружения не загружены т.к отсутствует файл .env")
-else:
-    load_dotenv()
-
-basedir = os.path.abspath(os.path.dirname(__file__))
+from flask_login import LoginManager
+from config import Config
+from flask_moment import Moment
+from flask_admin import Admin
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL') or \
-                          'sqlite:///' + os.path.join(basedir, 'shop.db')
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['SQLALCHEMY_SECRET_KEY'] = os.getenv('SECRET_KEY')
-app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
-
-
+app.config.from_object(Config)
 db = SQLAlchemy(app)
-manager = LoginManager(app)
-admin = Admin(app, name='Admin', template_mode='bootstrap4')
 migrate = Migrate(app, db)
+login = LoginManager(app)
+login.login_view = 'login'
+moment = Moment(app)
+admin = Admin(app, name='Admin', template_mode='bootstrap4')
 
-from app import models, routes
+if not app.debug:
+    if not os.path.exists('logs'):
+        os.mkdir('logs')
+    file_handler = RotatingFileHandler('logs/books_store.log', maxBytes=10240,
+                                       backupCount=10)
+    file_handler.setFormatter(logging.Formatter(
+        '%(asctime)s %(levelname)s: %(message)s [in %(pathname)s:%(lineno)d]'))
+    file_handler.setLevel(logging.INFO)
+    app.logger.addHandler(file_handler)
+
+    app.logger.setLevel(logging.INFO)
+    app.logger.info('books_store startup')
+
+from app import routes, models, errors, forms

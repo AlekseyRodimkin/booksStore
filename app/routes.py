@@ -1,86 +1,100 @@
 import flask_login
-from flask import render_template, redirect, url_for, request, flash
-from flask_login import login_user, login_required, logout_user
-from sqlalchemy.exc import IntegrityError
-from werkzeug.security import check_password_hash, generate_password_hash
 import os
 import io
 import datetime
+from urllib.parse import urlsplit
+from flask import render_template, flash, redirect, url_for, request
+from flask_login import login_user, logout_user, current_user, login_required
+import sqlalchemy as sa
 from app import app, db
+from app.forms import LoginForm, RegistrationForm
 from app.models import User, Book, Order
 
 # for pay
 from cloudipsp import Api, Checkout
 
 
-@app.route('/', methods=['GET'])
-def index():
-    return render_template('public/index.html')
+@app.before_request
+def before_request():
+    """The function of updating the last visit"""
+    if current_user.is_authenticated:
+        current_user.last_seen = datetime.datetime.utcnow()
+        db.session.commit()
 
 
-@app.route('/about', methods=['GET'])
-def about():
-    return render_template('public/about.html')
-
-
-@app.route('/about_private', methods=['GET'])
-def about_private():
-    return render_template('private/about_private.html')
-
-
-@app.route('/main', methods=['GET'])
+@app.route('/', methods=['GET', 'POST'])
+@app.route('/index', methods=['GET', 'POST'])
 @login_required
-def main():
+def index():
+    """The function of the main page"""
     books = Book.query.order_by(Book.price).all()
-    return render_template('private/main.html', data=books)
+    return render_template('index.html', title='Главная', data=books)
 
 
 @app.route('/login', methods=['GET', 'POST'])
-def login_page():
-    """Функция входа"""
-    login = request.form.get('login')
-    password = request.form.get('password')
+def login():
+    """
+    Account login function
+    :return: index or login pages
+    """
+    if current_user.is_authenticated:
+        return redirect(url_for('index'))
 
-    if login and password:
-        user = User.query.filter_by(login=login).first()
-        if user and check_password_hash(user.password, password):
-            login_user(user)
-            return redirect('/main')
-        else:
-            flash('Некорректный логин или пароль')
-    return render_template('public/login.html')
+    form = LoginForm()
+    if form.validate_on_submit():
+        user = db.session.scalar(
+            sa.select(User).where(User.username == form.username.data))
+        if user is None or not user.check_password(form.password.data):
+            flash('Некорректное имя или пароль')
+            return redirect(url_for('login'))
+        login_user(user, remember=form.remember_me.data)
+        next_page = request.args.get('next')
+        if not next_page or urlsplit(next_page).netloc != '':
+            next_page = url_for('index')
+        return redirect(next_page)
+    return render_template('login.html', title='Вход', form=form)
 
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
-    """Функция регистрации"""
-    login = request.form.get('login')
-    password = request.form.get('password')
-    password2 = request.form.get('password2')
+    """
+    Account register function
+    :return: register or login pages
+    """
+    if current_user.is_authenticated:
+        return redirect(url_for('index'))
 
-    if request.method == 'POST':
-        if not (login or password or password2):
-            flash('Заполните все поля!')
-        elif password != password2:
-            flash('Пароли должны совпадать')
-        else:
-            try:
-                hash_pwd = generate_password_hash(password)
-                new_user = User(login=login, password=hash_pwd)
-                db.session.add(new_user)
-                db.session.commit()
-            except IntegrityError:
-                flash('Логин занят')
-                return redirect(url_for('register'))
-
-            return redirect(url_for('login_page'))
-
-    return render_template('public/register.html')
+    form = RegistrationForm()
+    if form.validate_on_submit():
+        user = User(username=form.username.data, email=form.email.data, telegram=form.telegram.data)
+        user.set_password(form.password.data)
+        db.session.add(user)
+        db.session.commit()
+        flash('Вы зарегистрированы')
+        return redirect(url_for('login'))
+    return render_template('register.html', title='Регистрация', form=form)
 
 
-@app.route('/logout', methods=['GET', 'POST'])
+@app.route('/user/<username>')
 @login_required
+def user(username):
+    """
+    Profile function
+    :param username: str
+    :return: render profile and data
+    """
+    user = db.first_or_404(sa.select(User).where(User.username == username))
+    orders = flask_login.current_user.orders
+    time_now = datetime.datetime.now()
+    return render_template('user.html', user=user, data=orders, now=time_now)
+
+
+@app.route('/logout')
 def logout():
+    """
+    Account logout function
+    :return: index page
+    """
     logout_user()
     return redirect(url_for('index'))
 
@@ -97,13 +111,6 @@ def redirect_to_signin(response):
 def error404(error):
     """Функция-обработчик ошибки отсутствия страницы"""
     return render_template('404.html')
-
-
-@app.route('/None', methods=['GET'])
-@login_required
-def none_page():
-    """Функция-обработчик отсутствующей страницы перенаправления"""
-    return render_template('private/main.html')
 
 
 @app.route('/buy/<int:id>')
@@ -165,14 +172,6 @@ def book_rent(days: int, id: int):
     return redirect(url)
 
 
-@app.route('/box', methods=['GET'])
-@login_required
-def box():
-    orders = flask_login.current_user.orders
-    time_now = datetime.datetime.now()
-    return render_template('private/box.html', data=orders, now=time_now)
-
-
 @app.route('/reed/<int:id>', methods=['GET'])
 @login_required
 def reed(id):
@@ -180,4 +179,4 @@ def reed(id):
     text = os.path.abspath(os.path.join(os.path.dirname(__file__), 'books_files', book.filename))
 
     with io.open(text, encoding='utf-8') as file:
-        return render_template('private/reed.html', data=book, text=file.readlines())
+        return render_template('read.html', data=book, text=file.readlines())

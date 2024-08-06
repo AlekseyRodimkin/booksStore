@@ -17,11 +17,11 @@ ___
   ```
 - Запустить файл booksStore.py
 
-![Login](https://github.com/AlekseyRodimkin/bloknot_blog/raw/main/README/login.png)
-![Main](https://github.com/AlekseyRodimkin/bloknot_blog/raw/main/README/main.png)
-![User](https://github.com/AlekseyRodimkin/bloknot_blog/raw/main/README/user.png)
-![buy](https://github.com/AlekseyRodimkin/bloknot_blog/raw/main/README/buy.png)
-![book](https://github.com/AlekseyRodimkin/bloknot_blog/raw/main/README/book.png)
-![bot](https://github.com/AlekseyRodimkin/bloknot_blog/raw/main/README/bot.png)
-![admin_books](https://github.com/AlekseyRodimkin/bloknot_blog/raw/main/README/admin_books.png)
-![admin_users](https://github.com/AlekseyRodimkin/bloknot_blog/raw/main/README/admin_users.png)
+![Login](https://github.com/AlekseyRodimkin/booksStore/raw/main/README/login.png)
+![Main](https://github.com/AlekseyRodimkin/booksStore/raw/main/README/main.png)
+![User](https://github.com/AlekseyRodimkin/booksStore/raw/main/README/user.png)
+![buy](https://github.com/AlekseyRodimkin/booksStore/raw/main/README/buy.png)
+![book](https://github.com/AlekseyRodimkin/booksStore/raw/main/README/book.png)
+![bot](https://github.com/AlekseyRodimkin/booksStore/raw/main/README/bot.png)
+![admin_books](https://github.com/AlekseyRodimkin/booksStore/raw/main/README/admin_books.png)
+![admin_users](https://github.com/AlekseyRodimkin/booksStore/raw/main/README/admin_users.png)

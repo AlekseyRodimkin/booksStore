@@ -58,25 +58,3 @@ class RegistrationForm(FlaskForm):
             User.telegram == telegram.data))
         if user is not None:
             raise ValidationError('Аккаунт уже зарегистрирован')
-
-
-class EditProfileForm(FlaskForm):
-    """The form of changing information"""
-    username = StringField('Имя', validators=[DataRequired()])
-    about_me = TextAreaField('Обо мне', validators=[Length(min=0, max=140)])
-    submit = SubmitField('Сохранить')
-
-    def __init__(self, original_username, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.original_username = original_username
-
-    def validate_username(self, username):
-        if username.data != self.original_username:
-            user = db.session.scalar(sa.select(User).where(
-                User.username == username.data))
-            if user is not None:
-                raise ValidationError('Пожалуйста, используйте другое имя пользователя.')
-
-
-class EmptyForm(FlaskForm):
-    submit = SubmitField('Подтвердить')

@@ -6,15 +6,16 @@ from urllib.parse import urlsplit
 from flask import render_template, flash, redirect, url_for, request
 from flask_login import login_user, logout_user, current_user, login_required
 import sqlalchemy as sa
-from app import app, db
-from app.forms import LoginForm, RegistrationForm
+from app import db
 from app.models import User, Book, Order
+from app.main import bp
+
 
 # for pay
 from cloudipsp import Api, Checkout
 
 
-@app.before_request
+@bp.before_request
 def before_request():
     """The function of updating the last visit"""
     if current_user.is_authenticated:
@@ -22,8 +23,8 @@ def before_request():
         db.session.commit()
 
 
-@app.route('/', methods=['GET', 'POST'])
-@app.route('/index', methods=['GET', 'POST'])
+@bp.route('/', methods=['GET', 'POST'])
+@bp.route('/index', methods=['GET', 'POST'])
 @login_required
 def index():
     """The function of the main page"""
@@ -31,51 +32,7 @@ def index():
     return render_template('index.html', title='Главная', data=books)
 
 
-@app.route('/login', methods=['GET', 'POST'])
-def login():
-    """
-    Account login function
-    :return: index or login pages
-    """
-    if current_user.is_authenticated:
-        return redirect(url_for('index'))
-
-    form = LoginForm()
-    if form.validate_on_submit():
-        user = db.session.scalar(
-            sa.select(User).where(User.username == form.username.data))
-        if user is None or not user.check_password(form.password.data):
-            flash('Некорректное имя или пароль')
-            return redirect(url_for('login'))
-        login_user(user, remember=form.remember_me.data)
-        next_page = request.args.get('next')
-        if not next_page or urlsplit(next_page).netloc != '':
-            next_page = url_for('index')
-        return redirect(next_page)
-    return render_template('login.html', title='Вход', form=form)
-
-
-@app.route('/register', methods=['GET', 'POST'])
-def register():
-    """
-    Account register function
-    :return: register or login pages
-    """
-    if current_user.is_authenticated:
-        return redirect(url_for('index'))
-
-    form = RegistrationForm()
-    if form.validate_on_submit():
-        user = User(username=form.username.data, email=form.email.data, telegram=form.telegram.data)
-        user.set_password(form.password.data)
-        db.session.add(user)
-        db.session.commit()
-        flash('Вы зарегистрированы')
-        return redirect(url_for('login'))
-    return render_template('register.html', title='Регистрация', form=form)
-
-
-@app.route('/user/<username>')
+@bp.route('/user/<username>')
 @login_required
 def user(username):
     """
@@ -89,17 +46,7 @@ def user(username):
     return render_template('user.html', user=user, data=orders, now=time_now)
 
 
-@app.route('/logout')
-def logout():
-    """
-    Account logout function
-    :return: index page
-    """
-    logout_user()
-    return redirect(url_for('index'))
-
-
-@app.after_request
+@bp.after_request
 def redirect_to_signin(response):
     if response.status_code == 401:
         return redirect(url_for('login_page') + '?next=' + request.url)
@@ -107,13 +54,7 @@ def redirect_to_signin(response):
     return response
 
 
-@app.errorhandler(404)
-def error404(error):
-    """Функция-обработчик ошибки отсутствия страницы"""
-    return render_template('404.html')
-
-
-@app.route('/buy/<int:id>')
+@bp.route('/buy/<int:id>')
 def book_buy(id):
     """
     Функция покупки. Необходим VPN.
@@ -142,7 +83,7 @@ def book_buy(id):
     return redirect(url)
 
 
-@app.route('/rent/<int:days>/<int:id>')
+@bp.route('/rent/<int:days>/<int:id>')
 def book_rent(days: int, id: int):
     """
     Функция аренды. Необходим VPN.
@@ -172,7 +113,7 @@ def book_rent(days: int, id: int):
     return redirect(url)
 
 
-@app.route('/reed/<int:id>', methods=['GET'])
+@bp.route('/reed/<int:id>', methods=['GET'])
 @login_required
 def reed(id):
     book = db.session.query(Book).get(id)

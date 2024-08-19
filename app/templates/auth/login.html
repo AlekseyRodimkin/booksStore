@@ -4,9 +4,9 @@
 {% block content %}
     <h1>Вход</h1>
     {{ wtf.quick_form(form) }}
-    <p>Нет аккаунта? <a href="{{ url_for('register') }}">Зарегистрироваться</a></p>
+    <p>Нет аккаунта? <a href="{{ url_for('auth.register') }}">Зарегистрироваться</a></p>
     <p>
         Забыли пароль?
-        <a href="https://t.me/bloknot_blog_bot">Сбросить</a>
+        <a href="https://t.me/bloknot_blog_bot" target="_blank">Сбросить</a>
     </p>
 {% endblock %}

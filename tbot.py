@@ -9,8 +9,12 @@ from telebot.handler_backends import State, StatesGroup
 from werkzeug.security import generate_password_hash, check_password_hash
 import sqlalchemy as sa
 from sqlalchemy.exc import IntegrityError
-from app import app, db
+
+import app
+from app import db, current_app, create_app
 from app.models import User
+
+app = create_app()
 
 logger.add('logs/bot.log', format="{time} {level}    {message}", level="INFO")
 logger.add('logs/bot.log', format="{time} {level}    {message}", level="ERROR")
@@ -155,7 +159,7 @@ def connect(message: Message) -> None:
 def wait_username(message: Message) -> None:
     with bot.retrieve_data(message.from_user.id, message.chat.id) as data:
         data["username"] = message.text.strip()
-    with app.app_context():
+    with current_app.app_context():
         user = db.session.scalar(
             sa.select(User).where(User.username == message.text.strip()))
         if user:
@@ -197,10 +201,10 @@ def wait_pass_connect(message: Message) -> None:
                     bot.set_state(message.from_user.id, None, message.chat.id)
                     logger.debug("State -> None")
             else:
-                    bot.send_message(message.from_user.id,
-                                     f'Не верный пароль, попробуйте еще командой <connect>:', reply_markup=menu_buttons())
-                    bot.set_state(message.from_user.id, None, message.chat.id)
-                    logger.debug("State -> None")
+                bot.send_message(message.from_user.id,
+                                 f'Не верный пароль, попробуйте еще командой <connect>:', reply_markup=menu_buttons())
+                bot.set_state(message.from_user.id, None, message.chat.id)
+                logger.debug("State -> None")
 
 
 if __name__ == '__main__':

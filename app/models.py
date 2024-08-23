@@ -1,7 +1,5 @@
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import relationship
-from flask_admin.contrib.sqla import ModelView
-from flask_admin import BaseView, expose
 from datetime import datetime, timezone
 from hashlib import md5
 from typing import Optional
@@ -11,16 +9,8 @@ from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 from time import time
 import jwt
-from app import admin, db, login
+from app import db, login
 from flask import current_app, url_for
-
-
-class Exit(BaseView):
-    """Вкладка админ панели"""
-
-    @expose('/')
-    def exit_page(self):
-        return self.render('admin/exit_page/index.html')
 
 
 class User(db.Model, UserMixin):
@@ -116,13 +106,6 @@ class Book(db.Model):
         return self.name
 
 
-# Adding in admin panel
-admin.add_view(ModelView(User, db.session, name='Пользователи'))
-admin.add_view(ModelView(Book, db.session, name='Книги'))
-admin.add_view(ModelView(Order, db.session, name='Заказы'))
-admin.add_view(Exit(name='Выход', endpoint='exit'))
-
-
 @login.user_loader
 def load_user(id):
     """
@@ -131,4 +114,3 @@ def load_user(id):
     :param id: user ID
     """
     return db.session.get(User, int(id))
-

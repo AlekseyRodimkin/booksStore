@@ -1,0 +1,37 @@
+{% extends 'admin/base.html' %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h2>Статистика</h2>
+</div>
+
+<div class="row">
+    <div class="col-md-4">
+        <div class="card border-primary mb-3">
+            <div class="card-header">Книги</div>
+            <div class="card-body text-primary">
+                <h5 class="card-title">Количество: <strong>{{ books }}</strong></h5>
+                <p class="card-text">Общее количество книг в библиотеке.</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card border-success mb-3">
+            <div class="card-header">Пользователи</div>
+            <div class="card-body text-success">
+                <h5 class="card-title">Количество: <strong>{{ users }}</strong></h5>
+                <p class="card-text">Зарегистрированных пользователей.</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card border-warning mb-3">
+            <div class="card-header">Заказы</div>
+            <div class="card-body text-warning">
+                <h5 class="card-title">Количество: <strong>{{ orders }}</strong></h5>
+                <p class="card-text">Текущие заказы.</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -10,7 +10,6 @@ from app import db
 from app.models import User, Book, Order
 from app.main import bp
 
-
 # for pay
 from cloudipsp import Api, Checkout
 
@@ -44,14 +43,6 @@ def user(username):
     orders = flask_login.current_user.orders
     time_now = datetime.datetime.now()
     return render_template('user.html', user=user, data=orders, now=time_now)
-
-
-@bp.after_request
-def redirect_to_signin(response):
-    if response.status_code == 401:
-        return redirect(url_for('login_page') + '?next=' + request.url)
-
-    return response
 
 
 @bp.route('/buy/<int:id>')
@@ -121,3 +112,17 @@ def reed(id):
 
     with io.open(text, encoding='utf-8') as file:
         return render_template('read.html', data=book, text=file.readlines())
+
+
+# @bp.route('/admin', methods=['GET', 'POST'])
+# @basic_auth.required
+# def secret_view():
+#     return render_template('secret.html')
+
+
+@bp.after_request
+def redirect_to_signin(response):
+    if response.status_code == 401:
+        return redirect(url_for('login_page') + '?next=' + request.url)
+
+    return response

@@ -1,18 +1,11 @@
-import flask_login
-import os
-import io
-import datetime
 from urllib.parse import urlsplit
 from flask import render_template, flash, redirect, url_for, request
 from flask_login import login_user, logout_user, current_user, login_required
 import sqlalchemy as sa
 from app import db
-from app.models import User, Book, Order
+from app.models import User
 from app.auth.forms import LoginForm, RegistrationForm
 from app.auth import bp
-
-# for pay
-from cloudipsp import Api, Checkout
 
 
 @bp.route('/login', methods=['GET', 'POST'])

@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Админ-панель</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+{% with messages = get_flashed_messages() %}
+{% if messages %}
+{% for message in messages %}
+<div class="alert alert-info" role="alert">{{ message }}</div>
+{% endfor %}
+{% endif %}
+{% endwith %}
+{% block content %}
+{% endblock %}
+
+<div class="container mt-5" style="padding: 200px">
+    <h2>Вход в панель администратора</h2>
+    <form method="POST">
+        <div class="mb-3">
+            <label for="password" class="form-label">Пароль:</label>
+            <input type="password" class="form-control" id="password" name="password" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Войти</button>
+        <a href="{{ url_for('main.index') }}" class="btn btn-outline-secondary">Покинуть панель</a>
+    </form>
+</div>
+</body>

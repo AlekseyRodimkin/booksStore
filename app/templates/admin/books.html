@@ -1,0 +1,129 @@
+{% extends 'admin/base.html' %}
+
+{% block tableName %}Таблица книг{% endblock %}
+{% block content %}
+
+<table class="table table-striped table-bordered">
+    <thead>
+    <tr>
+        <th scope="col"><a href="{{ url_for('admin.books', sort='id') }}">ID</a></th>
+        <th scope="col"><a href="{{ url_for('admin.books', sort='name') }}">Имя</a></th>
+        <th scope="col"><a href="{{ url_for('admin.books', sort='price') }}">Цена</a></th>
+        <th scope="col"><a href="{{ url_for('admin.books', sort='category') }}">Категории</a></th>
+        <th scope="col"><a href="{{ url_for('admin.books', sort='author') }}">Автор</a></th>
+        <th scope="col"><a href="{{ url_for('admin.books', sort='year') }}">Год</a>
+        <th scope="col"><a href="{{ url_for('admin.books', sort='image_link') }}">Картинка</a>
+        <th scope="col"><a href="{{ url_for('admin.books', sort='filename') }}">Имя файла</a>
+        </th>
+        <th scope="col">Действия</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for book in books %}
+    <tr data-id="{{ book.id }}">
+        <td>{{ book.id }}</td>
+        <td>{{ book.name }}</td>
+        <td>{{ book.price }}</td>
+        <td>{{ book.category }}</td>
+        <td>{{ book.author }}</td>
+        <td>{{ book.year }}</td>
+        <td>{{ book.image_link }}</td>
+        <td>{{ book.filename }}</td>
+        <td>
+            <button id="edit-book-btn" data-id="{{ book.id }}" class="btn btn-outline-primary btn-sm">Изменить</button>
+            <a href="{{ url_for('admin.delete', object='book', id_object=book.id) }}"
+               class="btn btn-outline-danger btn-sm">Удалить</a>
+        </td>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+
+<!-- Модальное окно -->
+<div id="editModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="editModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editModalLabel">Редактировать книгу</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span>&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="update-book-form">
+                    <input type="hidden" id="book-id" name="id">
+                    <div class="form-group">
+                        <label for="book-name">Название книги:</label>
+                        <input type="text" class="form-control" id="book-name" name="name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="book-price">Цена:</label>
+                        <input type="number" class="form-control" id="book-price" name="price" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="book-category">Категория:</label>
+                        <input type="text" class="form-control" id="book-category" name="category" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="book-author">Автор:</label>
+                        <input type="text" class="form-control" id="book-author" name="author" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="book-year">Год:</label>
+                        <input type="number" class="form-control" id="book-year" name="year" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="book-image_link">Ссылка на изображение:</label>
+                        <input type="text" class="form-control" id="book-image_link" name="image_link">
+                    </div>
+                    <div class="form-group">
+                        <label for="book-filename">Имя файла:</label>
+                        <input type="text" class="form-control" id="book-filename" name="filename">
+                    </div>
+                    <button type="submit" class="btn btn-success">Сохранить</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Отмена</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $('#edit-book-btn').click(function() {
+        var id = $(this).data('id');
+        $.get('/admin/book/' + id, function(book) {
+            $('#book-id').val(book.id);
+            $('#book-name').val(book.name);
+            $('#book-price').val(book.price);
+            $('#book-category').val(book.category);
+            $('#book-author').val(book.author);
+            $('#book-year').val(book.year);
+            $('#book-image_link').val(book.image_link);
+            $('#book-filename').val(book.filename);
+            $('#editModal').modal('show');
+        });
+    });
+
+    $('#update-book-form').submit(function(e) {
+        e.preventDefault();
+        var id = $('#book-id').val();
+        $.ajax({
+            type: 'POST',
+            url: '/admin/edit/book/' + id,
+            data: $(this).serialize(),
+            success: function(response) {
+                // Обновление интерфейса...
+                $('#editModal').modal('hide');
+                alert('Книга обновлена!');
+            },
+            error: function() {
+                alert('Ошибка при обновлении книги.');
+            }
+        });
+    });
+
+    $('.close').click(function() {
+        $('#editModal').modal('hide');
+    });
+</script>
+{% endblock %}

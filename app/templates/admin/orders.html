@@ -2,36 +2,100 @@
 
 {% block tableName %}Таблица заказов{% endblock %}
 {% block content %}
+
 <table class="table table-striped table-bordered">
     <thead>
     <tr>
         <th scope="col"><a href="{{ url_for('admin.orders', sort='id') }}">ID</a></th>
-        <th scope="col"><a href="{{ url_for('admin.orders', sort='status') }}">Статус</a></th>
-        <th scope="col"><a href="{{ url_for('admin.orders', sort='start_rent') }}">Дата</a></th>
-        <th scope="col"><a href="{{ url_for('admin.orders', sort='end_rent') }}">Конец</a></th>
-        <th scope="col"><a href="{{ url_for('admin.orders', sort='book') }}">id книги</a>
+        <th scope="col"><a href="{{ url_for('admin.orders', sort='status ') }}">Статус</a></th>
+        <th scope="col"><a href="{{ url_for('admin.orders', sort='start_rent ') }}">Начало</a></th>
+        <th scope="col"><a href="{{ url_for('admin.orders', sort='end_rent ') }}">Конец</a></th>
         </th>
         <th scope="col">Действия</th>
     </tr>
     </thead>
     <tbody>
     {% for order in orders %}
-    <tr>
+    <tr data-id="{{ book.id }}">
         <td>{{ order.id }}</td>
         <td>{{ order.status }}</td>
         <td>{{ order.start_rent }}</td>
         <td>{{ order.end_rent }}</td>
-        <td>{{ order.book }}
-        </td>
         <td>
-            <div class="btn-group btn-group-sm" role="group" aria-label="First group">
-                <form action="{{ url_for('admin.delete', object='order', id_object=order.id) }}">
-                    {{ form.submit(value='Удалить') }}
-                </form>
-            </div>
+            <button id="edit-order-btn" data-id="{{ order.id }}" class="btn btn-outline-primary btn-sm">Изменить</button>
+            <a href="{{ url_for('admin.delete', object='order', id_object=order.id) }}"
+               class="btn btn-outline-danger btn-sm">Удалить</a>
         </td>
     </tr>
     {% endfor %}
     </tbody>
 </table>
+
+<!-- Модальное окно -->
+<div id="editModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="editModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editModalLabel">Редактировать заказ</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span>&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="update-order-form">
+                    <input type="hidden" id="order-id" name="id">
+                    <div class="form-group">
+                        <label for="order-status">Статус заказа:</label>
+                        <input type="text" class="form-control" id="order-status" name="status" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="order-start_rent">Начало:</label>
+                        <input type="text" class="form-control" id="order-start_rent" name="start_rent" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="order-end_rent">Конец:</label>
+                        <input type="text" class="form-control" id="order-end_rent" name="end_rent" required>
+                    </div>
+                    <button type="submit" class="btn btn-success">Сохранить</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Отмена</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $('#edit-order-btn').click(function() {
+        var id = $(this).data('id');
+        $.get('/admin/order/' + id, function(order) {
+            $('#order-id').val(order.id);
+            $('#order-status').val(order.status);
+            $('#order-start_rent').val(order.start_rent);
+            $('#order-end_rent').val(order.end_rent);
+            $('#editModal').modal('show');
+        });
+    });
+
+    $('#update-order-form').submit(function(e) {
+        e.preventDefault();
+        var id = $('#order-id').val();
+        $.ajax({
+            type: 'POST',
+            url: '/admin/edit/order/' + id,
+            data: $(this).serialize(),
+            success: function(response) {
+                // Обновление интерфейса...
+                $('#editModal').modal('hide');
+                alert('Заказ обновлен!');
+            },
+            error: function() {
+                alert('Ошибка при обновлении заказа.');
+            }
+        });
+    });
+
+    $('.close').click(function() {
+        $('#editModal').modal('hide');
+    });
+</script>
 {% endblock %}

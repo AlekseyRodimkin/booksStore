@@ -2,34 +2,32 @@
 
 {% block tableName %}Таблица пользователей{% endblock %}
 {% block content %}
+
 <table class="table table-striped table-bordered">
     <thead>
     <tr>
         <th scope="col"><a href="{{ url_for('admin.users', sort='id') }}">ID</a></th>
         <th scope="col"><a href="{{ url_for('admin.users', sort='username') }}">Имя</a></th>
         <th scope="col"><a href="{{ url_for('admin.users', sort='email') }}">Почта</a></th>
-        <th scope="col"><a href="{{ url_for('admin.users', sort='telegram') }}">Телеграм</a></th>
+        <th scope="col"><a href="{{ url_for('admin.users', sort='telegram') }}">Телеграмм</a></th>
         <th scope="col"><a href="{{ url_for('admin.users', sort='last_seen') }}">Посещение</a></th>
-        <th scope="col"><a href="{{ url_for('admin.users', sort='password_hash') }}">PassHash</a>
+        <th scope="col"><a href="{{ url_for('admin.users', sort='password_hash') }}">PassHash</a></th>
         </th>
         <th scope="col">Действия</th>
     </tr>
     </thead>
     <tbody>
     {% for user in users %}
-    <tr>
+    <tr data-id="{{ user.id }}">
         <td>{{ user.id }}</td>
         <td>{{ user.username }}</td>
         <td>{{ user.email }}</td>
         <td>{{ user.telegram }}</td>
         <td>{{ user.last_seen }}</td>
-        <td>{{ user.password_hash }}
-        </td>
+        <td>{{ user.password_hash }}</td>
         <td>
-            <div class="btn-group btn-group-sm" role="group" aria-label="First group">
-                <a href="{{ url_for('admin.delete', object='User', id_object=user.id) }}"
-                   class="btn btn-outline-danger">Удалить</a>
-            </div>
+            <a href="{{ url_for('admin.delete', object='user', id_object=user.id) }}"
+               class="btn btn-outline-danger btn-sm">Удалить</a>
         </td>
     </tr>
     {% endfor %}

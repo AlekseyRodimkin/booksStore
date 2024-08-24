@@ -162,3 +162,47 @@ def get_book(id_object):
         "image_link": book.image_link,
         "filename": book.filename
     }), 200
+
+@bp.route('/order/<int:id_object>', methods=['GET'])
+def get_order(id_object):
+    if not session.get('admin_logged_in'):
+        return redirect(url_for('admin.login'))
+
+    # Получаем запись по id
+    order = db.session.scalar(
+        select(Order).where(Order.id == id_object)
+    )
+
+    if order is None:
+        return jsonify({"error": "Заказ не найден"}), 404
+
+    return jsonify({
+        "id": order.id,
+        "status": order.status,
+        "start_rent": order.start_rent,
+        "end_rent": order.end_rent
+    }), 200
+
+
+@bp.route('/edit/order/<int:id_object>', methods=['POST'])
+def edit_order(id_object):
+    """Handle order editing via AJAX"""
+    if not session.get('admin_logged_in'):
+        return redirect(url_for('admin.login'))
+
+    # Получаем запись по id
+    order = db.session.scalar(
+        select(Order).where(Order.id == id_object)
+    )
+
+    if order is None:
+        return jsonify({"error": "Заказ не найден"}), 404
+
+    # Обновляем данные
+    order.status = request.form.get('status')
+    order.start_rent = request.form.get('start_rent')
+    order.end_rent = request.form.get('end_rent')
+
+    db.session.commit()
+    return jsonify({"success": "Заказ обовлен"}), 200
+    

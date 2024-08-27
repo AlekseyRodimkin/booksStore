@@ -1,6 +1,7 @@
 table {
     border-collapse: collapse;
-    margin: 20px;
+    margin: 0px;
+    padding: 0px;
     border-radius: 20px;
     font-size: 12px
 }
@@ -29,4 +30,12 @@ th, td {
     top: 0;
     right: -2.5px; /* Положение разделителя */
     height: 100%;
+}
+
+.btn {
+    margin-right: 5px;
+}
+
+.add {
+    margin: 10px;
 }

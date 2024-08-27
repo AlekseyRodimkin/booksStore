@@ -92,13 +92,11 @@ def delete(object, id_object):
     if not session.get('admin_logged_in'):
         return redirect(url_for('admin.login'))
 
-    # Determining which model to use based on the object parameter
     model_class = classes.get(object)
     if model_class is None:
         flash("Функция удаления такого объекта еще не реализована", "error")
         return redirect(url_for(f'admin.{object}s'))
 
-    # Getting a record by id
     obj = db.session.scalar(
         select(model_class).where(model_class.id == id_object)
     )
@@ -112,96 +110,69 @@ def delete(object, id_object):
     return redirect(url_for(f'admin.{object}s'))
 
 
-@bp.route('/edit/book/<int:id_object>', methods=['POST'])
+@bp.route('/admin/edit/book/<int:id_object>', methods=['POST'])
 def edit_book(id_object):
     """Handle book editing via AJAX"""
     if not session.get('admin_logged_in'):
         return redirect(url_for('admin.login'))
 
-    # Получаем запись по id
-    book = db.session.scalar(
-        select(Book).where(Book.id == id_object)
-    )
+    name = request.form.get('name')
+    price = request.form.get('price')
+    category = request.form.get('category')
+    author = request.form.get('author')
+    year = request.form.get('year')
+    image_link = request.form.get('image_link')
+    filename = request.form.get('filename')
 
-    if book is None:
-        return jsonify({"error": "Книга не найдена"}), 404
+    book = Book.query.get(id_object)
 
-    # Обновляем данные
-    book.name = request.form.get('name')
-    book.price = request.form.get('price')
-    book.category = request.form.get('category')
-    book.author = request.form.get('author')
-    book.year = request.form.get('year')
-    book.image_link = request.form.get('image_link')
-    book.filename = request.form.get('filename')
+    if not book:
+        return jsonify({"error": "Book not found"}), 404
 
-    db.session.commit()
-    return jsonify({"success": "Книга обновлена"}), 200
+    book.name = name
+    book.price = price
+    book.category = category
+    book.author = author
+    book.year = year
+    book.image_link = image_link
+    book.filename = filename
+
+    try:
+        db.session.commit()
+        return jsonify({"success": True, "message": "Book updated successfully"}), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": str(e)}), 500
 
 
-@bp.route('/book/<int:id_object>', methods=['GET'])
-def get_book(id_object):
+@bp.route('/admin/add/book', methods=['POST'])
+def add_book():
+    """Handle adding a new book via AJAX"""
     if not session.get('admin_logged_in'):
         return redirect(url_for('admin.login'))
 
-    # Получаем запись по id
-    book = db.session.scalar(
-        select(Book).where(Book.id == id_object)
+    name = request.form.get('name')
+    price = request.form.get('price')
+    category = request.form.get('category')
+    author = request.form.get('author')
+    year = request.form.get('year')
+    image_link = request.form.get('image_link')
+    filename = request.form.get('filename')
+
+    new_book = Book(
+        name=name,
+        price=price,
+        category=category,
+        author=author,
+        year=year,
+        image_link=image_link,
+        filename=filename
     )
 
-    if book is None:
-        return jsonify({"error": "Книга не найдена"}), 404
-
-    return jsonify({
-        "id": book.id,
-        "name": book.name,
-        "price": book.price,
-        "category": book.category,
-        "author": book.author,
-        "year": book.year,
-        "image_link": book.image_link,
-        "filename": book.filename
-    }), 200
-
-
-@bp.route('/edit/order/<int:id_object>', methods=['POST'])
-def edit_order(id_object):
-    """Handle order editing via AJAX"""
-    if not session.get('admin_logged_in'):
-        return redirect(url_for('admin.login'))
-
-    # Получаем запись по id
-    order = db.session.scalar(
-        select(Order).where(Order.id == id_object)
-    )
-
-    if order is None:
-        return jsonify({"error": "Заказ не найден"}), 404
-
-    # Обновляем данные
-    order.status = request.form.get('status')
-    order.start_rent = request.form.get('start_rent')
-    order.end_rent = request.form.get('end_rent')
-
-    db.session.commit()
-    return jsonify({"success": "Заказ обовлен"}), 200
-    
-@bp.route('/order/<int:id_object>', methods=['GET'])
-def get_order(id_object):
-    if not session.get('admin_logged_in'):
-        return redirect(url_for('admin.login'))
-
-    # Получаем запись по id
-    order = db.session.scalar(
-        select(Order).where(Order.id == id_object)
-    )
-
-    if order is None:
-        return jsonify({"error": "Заказ не найден"}), 404
-
-    return jsonify({
-        "id": order.id,
-        "status": order.status,
-        "start_rent": order.start_rent,
-        "end_rent": order.end_rent
-    }), 200
+    try:
+        db.session.add(new_book)
+        db.session.commit()
+        return jsonify({"success": True, "message": "Book added successfully"}), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": str(e)}), 500

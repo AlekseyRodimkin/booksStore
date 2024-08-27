@@ -3,7 +3,7 @@
 ### Flask приложение для покупки и аренды книг.
 
 ### Онлайн библиотека с возможностью покупки или аренды книг.
-### Предусмотрена панель администратора. (/admin)
+### Предусмотрена панель администратора. (/admin, пароль в вашем .env)
 ### У администратора есть возможность изменения списка и характеристик книг, пользователей и заказов.
 ### cloudipsp - Библиотека для проведения платежей через платформу  [Fondy](https://fondy.ua/ru/). Из-за некоторых ограничений, для работы из России необходим VPN для регистрации и проведение платежей (при нажатии купить/аренда). Но платформа предоставляет возможность использовать тестовые транзакции, что и использовано в проекте.
 ___
@@ -23,5 +23,8 @@ ___
 ![buy](https://github.com/AlekseyRodimkin/booksStore/raw/main/README/buy.png)
 ![book](https://github.com/AlekseyRodimkin/booksStore/raw/main/README/book.png)
 ![bot](https://github.com/AlekseyRodimkin/booksStore/raw/main/README/bot.png)
-![admin_books](https://github.com/AlekseyRodimkin/booksStore/raw/main/README/admin_books.png)
+![admin_login](https://github.com/AlekseyRodimkin/booksStore/raw/main/README/admin_log.png)
+![admin_main](https://github.com/AlekseyRodimkin/booksStore/raw/main/README/admin_main.png)
 ![admin_users](https://github.com/AlekseyRodimkin/booksStore/raw/main/README/admin_users.png)
+![admin_books](https://github.com/AlekseyRodimkin/booksStore/raw/main/README/admin_books.png)
+![admin_book_edit](https://github.com/AlekseyRodimkin/booksStore/raw/main/README/admin_book_edit.png)

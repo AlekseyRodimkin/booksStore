@@ -21,7 +21,7 @@ class User(db.Model, UserMixin):
     email: so.Mapped[str] = so.mapped_column(sa.String(120), index=True,
                                              unique=True)
     telegram: so.Mapped[str] = so.mapped_column(sa.String(120), index=True,
-                                                unique=True, default=None)
+                                                default=None, nullable=True)
     password_hash: so.Mapped[Optional[str]] = so.mapped_column(sa.String(256))
     last_seen: so.Mapped[Optional[datetime]] = so.mapped_column(
         default=lambda: datetime.now(timezone.utc))

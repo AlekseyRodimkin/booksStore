@@ -54,7 +54,8 @@ class RegistrationForm(FlaskForm):
         :param telegram: telegram address
         :return: not or error
         """
-        user = db.session.scalar(sa.select(User).where(
-            User.telegram == telegram.data))
-        if user is not None:
-            raise ValidationError('Аккаунт уже зарегистрирован')
+        if telegram.data:
+            user = db.session.scalar(sa.select(User).where(
+                User.telegram == telegram.data))
+            if user is not None:
+                raise ValidationError('Аккаунт с этим Telegram уже зарегистрирован')

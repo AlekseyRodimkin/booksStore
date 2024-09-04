@@ -7,3 +7,6 @@ flask db downgrade - отменяет последнюю миграцию
 flask db stamp head
 flask db migrate -m "comment"
 flask db upgrade
+
+при Error: Could not import '.........'.
+.env -> FLASK_APP=book_store.py
